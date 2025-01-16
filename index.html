@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Counter</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2f;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #4caf50;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #ffffff;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .counter {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            background-color: #333344;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .main-button {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .main-button:active {
+            background-color: #3e8e41;
+        }
+
+        .reset-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .reset-button:active {
+            background-color: #d32f2f;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-top: 30px;
+        }
+
+        textarea {
+            width: 80%;
+            height: 120px;
+            font-size: 1em;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #28293e;
+            color: #ffffff;
+        }
+
+        textarea::placeholder {
+            color: #aaaaaa;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #333344;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Day Counter</h1>
+    </header>
+
+    <div class="container">
+        <div class="counter" id="day-counter">0 Days (0 Years, 0 Months, 0 Days)</div>
+        <br>
+        <button class="main-button" onclick="incrementDay()" oncontextmenu="event.preventDefault(); inputStartDate()">One Day at a Time</button>
+        <button class="reset-button" onclick="confirmReset()">Reset</button>
+
+        <h2>My Reason for Stopping</h2>
+        <textarea id="reason" placeholder="Type your reason here..."></textarea>
+
+        <h2>What am I Going to Do Today to Protect Myself</h2>
+        <textarea id="today-plan" placeholder="Type your plan here..."></textarea>
+
+        <h2>Notes for Meeting</h2>
+        <textarea id="meeting-notes" placeholder="Type your meeting notes here..."></textarea>
+    </div>
+
+    <footer>
+        © 2025 Day Counter. All rights reserved.
+    </footer>
+
+    <script>
+        let dayCounter = parseInt(localStorage.getItem('dayCounter')) || 0;
+
+        function updateCounterDisplay() {
+            const years = Math.floor(dayCounter / 365);
+            const months = Math.floor((dayCounter % 365) / 30);
+            const days = dayCounter % 30;
+            document.getElementById('day-counter').textContent = `${dayCounter} Days (${years} Years, ${months} Months, ${days} Days)`;
+        }
+
+        updateCounterDisplay();
+
+        function incrementDay() {
+            dayCounter++;
+            localStorage.setItem('dayCounter', dayCounter);
+            updateCounterDisplay();
+        }
+
+        function inputStartDate() {
+            const inputDate = prompt("Enter the start date (dd/mm/yyyy):");
+            if (inputDate) {
+                const [day, month, year] = inputDate.split('/').map(Number);
+                const startDate = new Date(year, month - 1, day);
+                const currentDate = new Date();
+
+                if (isNaN(startDate)) {
+                    alert("Invalid date format. Please use dd/mm/yyyy.");
+                    return;
+                }
+
+                const timeDifference = currentDate - startDate;
+                if (timeDifference < 0) {
+                    alert("The start date cannot be in the future.");
+                    return;
+                }
+
+                const daysSince = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+                dayCounter = daysSince;
+                localStorage.setItem('dayCounter', dayCounter);
+                updateCounterDisplay();
+            }
+        }
+
+        function confirmReset() {
+            if (confirm("Are you sure you want to reset the counter?")) {
+                dayCounter = 0;
+                localStorage.setItem('dayCounter', dayCounter);
+                updateCounterDisplay();
+            }
+        }
+
+        const reasonBox = document.getElementById('reason');
+        const savedReason = localStorage.getItem('reason');
+        if (savedReason) {
+            reasonBox.value = savedReason;
+        }
+        reasonBox.addEventListener('input', () => {
+            localStorage.setItem('reason', reasonBox.value);
+        });
+
+        const planBox = document.getElementById('today-plan');
+        const savedPlan = localStorage.getItem('todayPlan');
+        if (savedPlan) {
+            planBox.value = savedPlan;
+        }
+        planBox.addEventListener('input', () => {
+            localStorage.setItem('todayPlan', planBox.value);
+        });
+
+        const meetingNotesBox = document.getElementById('meeting-notes');
+        const savedNotes = localStorage.getItem('meetingNotes');
+        if (savedNotes) {
+            meetingNotesBox.value = savedNotes;
+        }
+        meetingNotesBox.addEventListener('input', () => {
+            localStorage.setItem('meetingNotes', meetingNotesBox.value);
+        });
+    </script>
+</body>
+</html>
