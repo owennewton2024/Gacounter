@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Day Counter</title>
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -72,11 +73,6 @@
             background-color: #d32f2f;
         }
 
-        h2 {
-            font-size: 1.5em;
-            margin-top: 30px;
-        }
-
         textarea {
             width: 80%;
             height: 120px;
@@ -87,10 +83,17 @@
             border-radius: 8px;
             background-color: #28293e;
             color: #ffffff;
+            cursor: pointer;
         }
 
         textarea::placeholder {
             color: #aaaaaa;
+        }
+
+        label {
+            font-size: 1.2em;
+            margin-top: 20px;
+            display: block;
         }
 
         footer {
@@ -100,6 +103,12 @@
             color: #888888;
         }
     </style>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(() => console.log('Service Worker Registered'));
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -109,17 +118,23 @@
     <div class="container">
         <div class="counter" id="day-counter">0 Days (0 Years, 0 Months, 0 Days)</div>
         <br>
-        <button class="main-button" onclick="incrementDay()" oncontextmenu="event.preventDefault(); inputStartDate()">One Day at a Time</button>
+        <button class="main-button" onclick="incrementDay()">One Day at a Time</button>
         <button class="reset-button" onclick="confirmReset()">Reset</button>
 
-        <h2>My Reason for Stopping</h2>
-        <textarea id="reason" placeholder="Type your reason here..."></textarea>
+        <section>
+            <label for="reason">My Reason for Stopping</label>
+            <textarea id="reason" placeholder="Type your reason here..."></textarea>
+        </section>
 
-        <h2>What am I Going to Do Today to Protect Myself</h2>
-        <textarea id="today-plan" placeholder="Type your plan here..."></textarea>
+        <section>
+            <label for="today-plan">What am I Going to Do Today to Protect Myself</label>
+            <textarea id="today-plan" placeholder="Type your plan here..."></textarea>
+        </section>
 
-        <h2>Notes for Meeting</h2>
-        <textarea id="meeting-notes" placeholder="Type your meeting notes here..."></textarea>
+        <section>
+            <label for="meeting-notes">Notes for Meeting</label>
+            <textarea id="meeting-notes" placeholder="Type your meeting notes here..."></textarea>
+        </section>
     </div>
 
     <footer>
@@ -127,82 +142,45 @@
     </footer>
 
     <script>
-        let dayCounter = parseInt(localStorage.getItem('dayCounter')) || 0;
+        const dayCounterDisplay = document.getElementById('day-counter');
 
-        function updateCounterDisplay() {
+        const saveToStorage = (key, value) => localStorage.setItem(key, value);
+        const loadFromStorage = (key, defaultValue) => localStorage.getItem(key) || defaultValue;
+
+        let dayCounter = parseInt(loadFromStorage('dayCounter', 0));
+
+        const updateCounterDisplay = () => {
             const years = Math.floor(dayCounter / 365);
             const months = Math.floor((dayCounter % 365) / 30);
             const days = dayCounter % 30;
-            document.getElementById('day-counter').textContent = `${dayCounter} Days (${years} Years, ${months} Months, ${days} Days)`;
-        }
+            dayCounterDisplay.textContent = `${dayCounter} Days (${years} Years, ${months} Months, ${days} Days)`;
+        };
 
         updateCounterDisplay();
 
-        function incrementDay() {
+        const incrementDay = () => {
             dayCounter++;
-            localStorage.setItem('dayCounter', dayCounter);
+            saveToStorage('dayCounter', dayCounter);
             updateCounterDisplay();
-        }
+        };
 
-        function inputStartDate() {
-            const inputDate = prompt("Enter the start date (dd/mm/yyyy):");
-            if (inputDate) {
-                const [day, month, year] = inputDate.split('/').map(Number);
-                const startDate = new Date(year, month - 1, day);
-                const currentDate = new Date();
-
-                if (isNaN(startDate)) {
-                    alert("Invalid date format. Please use dd/mm/yyyy.");
-                    return;
-                }
-
-                const timeDifference = currentDate - startDate;
-                if (timeDifference < 0) {
-                    alert("The start date cannot be in the future.");
-                    return;
-                }
-
-                const daysSince = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-                dayCounter = daysSince;
-                localStorage.setItem('dayCounter', dayCounter);
-                updateCounterDisplay();
-            }
-        }
-
-        function confirmReset() {
+        const confirmReset = () => {
             if (confirm("Are you sure you want to reset the counter?")) {
                 dayCounter = 0;
-                localStorage.setItem('dayCounter', dayCounter);
+                saveToStorage('dayCounter', dayCounter);
                 updateCounterDisplay();
             }
-        }
+        };
 
-        const reasonBox = document.getElementById('reason');
-        const savedReason = localStorage.getItem('reason');
-        if (savedReason) {
-            reasonBox.value = savedReason;
-        }
-        reasonBox.addEventListener('input', () => {
-            localStorage.setItem('reason', reasonBox.value);
-        });
+        const setupTextarea = (id, storageKey) => {
+            const textarea = document.getElementById(id);
+            textarea.value = loadFromStorage(storageKey, '');
+            textarea.addEventListener('input', () => saveToStorage(storageKey, textarea.value));
+        };
 
-        const planBox = document.getElementById('today-plan');
-        const savedPlan = localStorage.getItem('todayPlan');
-        if (savedPlan) {
-            planBox.value = savedPlan;
-        }
-        planBox.addEventListener('input', () => {
-            localStorage.setItem('todayPlan', planBox.value);
-        });
-
-        const meetingNotesBox = document.getElementById('meeting-notes');
-        const savedNotes = localStorage.getItem('meetingNotes');
-        if (savedNotes) {
-            meetingNotesBox.value = savedNotes;
-        }
-        meetingNotesBox.addEventListener('input', () => {
-            localStorage.setItem('meetingNotes', meetingNotesBox.value);
-        });
+        setupTextarea('reason', 'reason');
+        setupTextarea('today-plan', 'todayPlan');
+        setupTextarea('meeting-notes', 'meetingNotes');
     </script>
 </body>
 </html>
