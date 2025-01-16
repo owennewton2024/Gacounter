@@ -31,13 +31,25 @@
         }
 
         .counter {
-            font-size: 2.5em;
-            font-weight: bold;
             margin: 20px 0;
             background-color: #333344;
             padding: 15px;
             border-radius: 8px;
             display: inline-block;
+            text-align: center;
+        }
+
+        .counter .days {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .counter .details {
+            font-size: 1.2em;
+            font-weight: normal;
+            margin: 0;
+            color: #bbbbbb;
         }
 
         button {
@@ -107,7 +119,10 @@
     </header>
 
     <div class="container">
-        <div class="counter" id="day-counter">0 Days (0 Years, 0 Months, 0 Days)</div>
+        <div class="counter" id="day-counter">
+            <div class="days">0 Days</div>
+            <div class="details">(0 Years, 0 Months, 0 Days)</div>
+        </div>
         <br>
         <button class="main-button" onclick="incrementDay()" oncontextmenu="event.preventDefault(); inputStartDate()">One Day at a Time</button>
         <button class="reset-button" onclick="confirmReset()">Reset</button>
@@ -133,7 +148,8 @@
             const years = Math.floor(dayCounter / 365);
             const months = Math.floor((dayCounter % 365) / 30);
             const days = dayCounter % 30;
-            document.getElementById('day-counter').textContent = `${dayCounter} Days (${years} Years, ${months} Months, ${days} Days)`;
+            document.querySelector('#day-counter .days').textContent = `${dayCounter} Days`;
+            document.querySelector('#day-counter .details').textContent = `(${years} Years, ${months} Months, ${days} Days)`;
         }
 
         updateCounterDisplay();
